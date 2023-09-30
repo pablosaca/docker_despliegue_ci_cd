@@ -6,7 +6,7 @@ import pandas as pd
 from shiny import App, Inputs, Outputs, Session, render, ui, reactive
 from htmltools import css
 
-from aux_params import user_input_select, output_model
+from src.aux_params import user_input_select, output_model
 from src.utils import columns_table
 
 name_path = os.path.dirname(__file__)
