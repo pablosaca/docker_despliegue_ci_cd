@@ -135,40 +135,44 @@ def check_values_input(request: dict):
                 if not isinstance(v, (int, float)):
                     raise TypeError(f"Formato incorrecto de la variable - {col} - {value}")
         else:
-            for v in value:
-                if not isinstance(v, str):
-                    raise TypeError(f"Formato incorrecto de la variable - {col} - {value}")
-                # specific check levels of category feature
-                else:
-                    if col == "workclass":
-                        levels = list(workclass.values())
-                        if v not in levels:
-                            raise ValueError(f"Incorrectos niveles en {col} - {levels}")
-                    if col == "education":
-                        levels = list(education.values())
-                        if v not in levels:
-                            raise ValueError(f"Incorrectos niveles en {col} - {levels}")
-                    if col == "marital-status":
-                        levels = list(marital_status.values())
-                        if v not in levels:
-                            raise ValueError(f"Incorrectos niveles en {col} - {levels}")
-                    if col == "occupation":
-                        levels = list(occupation.values())
-                        if v not in levels:
-                            raise ValueError(f"Incorrectos niveles en {col} - {levels}")
-                    if col == "relationship":
-                        levels = list(relationship.values())
-                        if v not in levels:
-                            raise ValueError(f"Incorrectos niveles en {col} - {levels}")
-                    if col == "race":
-                        levels = list(race.values())
-                        if v not in levels:
-                            raise ValueError(f"Incorrectos niveles en {col} - {levels}")
-                    if col == "gender":
-                        levels = list(gender.values())
-                        if v not in levels:
-                            raise ValueError(f"Incorrectos niveles en {col} - {levels}")
-                    if col == "native-country":
-                        levels = list(native_country.values())
-                        if v not in levels:
-                            raise ValueError(f"Incorrectos niveles en {col} - {levels}")
+            check_levels(col, value)
+
+
+def check_levels(col, value):
+    for v in value:
+        if not isinstance(v, str):
+            raise TypeError(f"Formato incorrecto de la variable - {col} - {value}")
+        # specific check levels of category feature
+        else:
+            if col == "workclass":
+                levels = list(workclass.values())
+                if v not in levels:
+                    raise ValueError(f"Incorrectos niveles en {col} - {levels}")
+            if col == "education":
+                levels = list(education.values())
+                if v not in levels:
+                    raise ValueError(f"Incorrectos niveles en {col} - {levels}")
+            if col == "marital-status":
+                levels = list(marital_status.values())
+                if v not in levels:
+                    raise ValueError(f"Incorrectos niveles en {col} - {levels}")
+            if col == "occupation":
+                levels = list(occupation.values())
+                if v not in levels:
+                    raise ValueError(f"Incorrectos niveles en {col} - {levels}")
+            if col == "relationship":
+                levels = list(relationship.values())
+                if v not in levels:
+                    raise ValueError(f"Incorrectos niveles en {col} - {levels}")
+            if col == "race":
+                levels = list(race.values())
+                if v not in levels:
+                    raise ValueError(f"Incorrectos niveles en {col} - {levels}")
+            if col == "gender":
+                levels = list(gender.values())
+                if v not in levels:
+                    raise ValueError(f"Incorrectos niveles en {col} - {levels}")
+            if col == "native-country":
+                levels = list(native_country.values())
+                if v not in levels:
+                    raise ValueError(f"Incorrectos niveles en {col} - {levels}")
