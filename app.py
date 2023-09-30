@@ -11,6 +11,8 @@ from src.utils import columns_table
 name_path = os.path.dirname(__file__)
 name_path = os.path.join(name_path, 'model')
 
+print(name_path)
+
 style = css(font_weight="bold", color="yellow")
 
 app_ui = ui.page_fluid(

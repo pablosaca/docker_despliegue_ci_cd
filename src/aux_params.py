@@ -43,8 +43,8 @@ def user_input_select():
 
 def output_model(df: pd.DataFrame, path: str):
 
-    model = joblib.load(f"{path}")
-    normalizer = joblib.load(path)
+    model = joblib.load(f"{path}/nn_model.joblib")
+    normalizer = joblib.load(f"{path}/normalization.joblib")
 
     # convert to dummy variables
     category_columns = list(df.select_dtypes(include=['category', 'object']).columns)
