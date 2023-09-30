@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 import pandas as pd
 
@@ -106,4 +105,4 @@ def server(input_feature: Inputs, output: Outputs, session: Session):
         session.close()
 
 
-app = App(app_ui, server, debug=True, static_assets=image_dir)
+app = App(app_ui, server, debug=True)
