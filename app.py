@@ -16,7 +16,6 @@ style = css(font_weight="bold", color="yellow")
 
 app_ui = ui.page_fluid(
     {"style": "background-color: rgba(176, 242, 194, 0.25)"},
-    ui.img(src="uned_image.png", _add_ws=False, style="width: 200px; height: 100px"),
     ui.markdown(
         """
         # Prediction of annual earnings - Shiny Web App
@@ -107,5 +106,4 @@ def server(input_feature: Inputs, output: Outputs, session: Session):
         session.close()
 
 
-image_dir = Path(__file__).parent / "images"
 app = App(app_ui, server, debug=True, static_assets=image_dir)
