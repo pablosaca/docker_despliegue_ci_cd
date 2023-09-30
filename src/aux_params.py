@@ -1,7 +1,20 @@
 import joblib
 import pandas as pd
 from shiny import ui
-from _utils import *
+from src.utils import (
+    age,
+    workclass,
+    education,
+    marital_status,
+    occupation,
+    relationship,
+    race,
+    gender,
+    cap_gain,
+    cap_loss,
+    hp_week,
+    native_country
+)
 
 
 __all__ = ["user_input_select",

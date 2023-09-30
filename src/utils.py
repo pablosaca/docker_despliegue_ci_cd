@@ -1,6 +1,4 @@
 
-
-
 # general response
 workclass = {'Private': 'Private',
              'State': 'State',
