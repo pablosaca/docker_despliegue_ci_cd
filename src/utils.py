@@ -1,5 +1,6 @@
 
 
+
 # general response
 workclass = {'Private': 'Private',
              'State': 'State',
@@ -83,6 +84,21 @@ native_country = {'United-States': 'United-States',
                   'France': 'France',
                   'Holand-Netherlands': 'Holand-Netherlands'}
 
+age = {"value": 25,
+       "min": 16,
+       "max": 65}
+
+cap_gain = {"value": 1080,
+            "min": 0,
+            "max": 10000}
+
+cap_loss = {"value": 95,
+            "min": 0,
+            "max": 5000}
+
+hp_week = {"value": 40,
+           "min": 8,
+           "max": 48}
 
 columns_table = ["age",
                  "workclass",
@@ -97,52 +113,3 @@ columns_table = ["age",
                  "hours-per-week",
                  "native-country"
                  ]
-
-
-def check_key_input(features_names: list):
-
-    if len(features_names) != len(columns_table):
-        raise ValueError("Número de variables explicativas del modelo inadecuado. "
-                         f" Deben ser un total de {len(columns_table)}")
-
-    for feature, check_feature in zip(features_names, columns_table):
-        if feature != check_feature:
-            raise ValueError(f"Las variables explicativas deben ser {columns_table}")
-
-
-def check_values_input(request: dict):
-
-    # Definir un diccionario con niveles válidos para cada columna
-    valid_levels = {
-        "workclass": workclass.values(),
-        "education": education.values(),
-        "marital-status": marital_status.values(),
-        "occupation": occupation.values(),
-        "relationship": relationship.values(),
-        "race": race.values(),
-        "gender": gender.values(),
-        "native-country": native_country.values(),
-    }
-
-    for col, value in request.items():
-        # check format values in list
-        if col in ["age", "capital-gain", "capital-loss", "hours-per-week"]:
-            for v in value:
-                if not isinstance(v, (int, float)):
-                    raise TypeError(f"Formato incorrecto de la variable - {col} - {value}")
-        else:
-            check_levels(col, value, valid_levels)
-
-
-def check_levels(col, value, valid_levels):
-
-    if col not in valid_levels:
-        raise ValueError(f"Columna desconocida: {col}")
-
-    levels = valid_levels[col]
-
-    for v in value:
-        if not isinstance(v, str):
-            raise TypeError(f"Formato incorrecto de la variable - {col} - {value}")
-        if v not in levels:
-            raise ValueError(f"Incorrectos niveles en {col} - {levels}")

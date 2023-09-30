@@ -1,28 +1,37 @@
-import os
 import joblib
-
-from enum import Enum
-
 import pandas as pd
+from shiny import ui
+from _utils import *
 
 
-__all__ = ["Constants", "output_model"]
+__all__ = ["user_input_select",
+           "output_model"]
 
 
-PATH = os.path.dirname(__file__)
-PATH = PATH.replace(r"\src", "")
-PATH = os.path.join(PATH, 'model')
-
-
-class Constants(Enum):
-    THRESHOLD = 0.3
+def user_input_select():
+    return ui.panel_sidebar(ui.input_slider("age", "AGE", min=age["min"], max=age["max"], value=age["value"]),
+                            ui.input_select("workclass", "WORKCLASS", workclass),
+                            ui.input_select("education", "EDUCATION", education),
+                            ui.input_radio_buttons("marital_status", "MARITAL STATUS", marital_status),
+                            ui.input_select("occupation", "OCCUPATION", occupation),
+                            ui.input_select("relationship", "RELATIONSHIP", relationship),
+                            ui.input_radio_buttons("race", "RACE", race),
+                            ui.input_select("gender", "GENDER", gender),
+                            ui.input_numeric("capital_gain", "CAPTITAL GAIN",
+                                             cap_gain["value"], min=cap_gain["min"], max=cap_gain["max"]),
+                            ui.input_numeric("capital_loss", "CAPTITAL LOSS",
+                                             cap_loss["value"], min=cap_loss["min"], max=cap_loss["max"]),
+                            ui.input_numeric("hours_week", "HOURS PER WEEK",
+                                             hp_week["value"], min=hp_week["min"], max=hp_week["max"]),
+                            ui.input_select("native_country", "NATIVE_COUNTRY", native_country),
+                            ui.input_action_button("btn", "INCOME?", class_="btn-success")
+                            )
 
 
 def output_model(df: pd.DataFrame, path: str):
 
-    # cargar path
-    model = joblib.load(f'{path}/rf_calib_model.joblib')
-    normalizer = joblib.load(f'{path}/normalization.joblib')
+    model = joblib.load(f"{path}")
+    normalizer = joblib.load(path)
 
     # convert to dummy variables
     category_columns = list(df.select_dtypes(include=['category', 'object']).columns)
@@ -46,6 +55,11 @@ def output_model(df: pd.DataFrame, path: str):
     # normalize variables
     X = normalizer.transform(df)
 
-    # getting prediction: array [pos(0), pos(1)] -> [major, minor]
-    minor_class_prob = list(model.predict_proba(X)[:, 1])
-    return minor_class_prob
+    # getting prediction
+    # redes convolucionales - se añade una dimensión a los datos
+    X = X.reshape(X.shape[0], X.shape[1], 1)
+    prediction_proba = model.predict(X)
+
+    output1 = round(prediction_proba[0][0] * 100, 2)
+    pred = f"{str(output1)} %"
+    return pred
