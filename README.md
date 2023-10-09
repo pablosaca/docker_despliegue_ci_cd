@@ -1,4 +1,4 @@
-# Deploy Machine Learning model with FastAPI
+# Deploy Machine Learning model with FastAPI & Docker
 
 This repo consist of a deployment a Machine Learning model using FastAPI (https://fastapi.tiangolo.com/) library by Sebastián Ramírez (https://github.com/tiangolo). 
 

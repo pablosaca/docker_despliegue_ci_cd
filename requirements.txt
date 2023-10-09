@@ -3,7 +3,9 @@ htmltools==0.3.0
 joblib==1.2.0
 pandas==1.5.3
 numpy==1.24.3
-seaborn==0.12.2
 scikit-learn==1.2.2
 tensorflow==2.13.0
+seaborn==0.12.2
+lime==0.2.0.1
+jupyterlab==3.6.3
 mdit_py_plugins==0.3.0
