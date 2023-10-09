@@ -1,78 +1,63 @@
+import os
 import joblib
 import pandas as pd
+import tensorflow as tf
+from lime.lime_text import LimeTextExplainer
 from shiny import ui
-from src.utils import (
-    age,
-    workclass,
-    education,
-    marital_status,
-    occupation,
-    relationship,
-    race,
-    gender,
-    cap_gain,
-    cap_loss,
-    hp_week,
-    native_country
-)
-
+from src.utils import Constants, clean_text, prep_neural_network
 
 __all__ = ["user_input_select",
            "output_model"]
 
 
 def user_input_select():
-    return ui.panel_sidebar(ui.input_slider("age", "AGE", min=age["min"], max=age["max"], value=age["value"]),
-                            ui.input_select("workclass", "WORKCLASS", workclass),
-                            ui.input_select("education", "EDUCATION", education),
-                            ui.input_radio_buttons("marital_status", "MARITAL STATUS", marital_status),
-                            ui.input_select("occupation", "OCCUPATION", occupation),
-                            ui.input_select("relationship", "RELATIONSHIP", relationship),
-                            ui.input_radio_buttons("race", "RACE", race),
-                            ui.input_select("gender", "GENDER", gender),
-                            ui.input_numeric("capital_gain", "CAPTITAL GAIN",
-                                             cap_gain["value"], min=cap_gain["min"], max=cap_gain["max"]),
-                            ui.input_numeric("capital_loss", "CAPTITAL LOSS",
-                                             cap_loss["value"], min=cap_loss["min"], max=cap_loss["max"]),
-                            ui.input_numeric("hours_week", "HOURS PER WEEK",
-                                             hp_week["value"], min=hp_week["min"], max=hp_week["max"]),
-                            ui.input_select("native_country", "NATIVE_COUNTRY", native_country),
+    return ui.panel_sidebar(ui.input_text_area("text", "Text area", placeholder="Enter text"),
                             ui.input_action_button("btn", "INCOME?", class_="btn-success")
                             )
 
 
-def output_model(df: pd.DataFrame, path: str):
+def output_model(df: pd.DataFrame, name_path: str):
 
-    model = joblib.load(f"{path}/nn_model.joblib")
-    normalizer = joblib.load(f"{path}/normalization.joblib")
+    # input text as dataframe (se limpia el texto)
+    df['text'] = df['text'].apply(clean_text)
 
-    # convert to dummy variables
-    category_columns = list(df.select_dtypes(include=['category', 'object']).columns)
-    other_columns = list(df.select_dtypes(exclude=['category', 'object']).columns)
+    dict_path = os.path.join(name_path, Constants.PREP_PATH.value)
+    prep_dict = prep_neural_network(path=dict_path)  # text preprocessing token
 
-    df_dummy = pd.get_dummies(df[category_columns], drop_first=False, dtype=float)
+    model_path = os.path.join(name_path, Constants.MODEL_PATH.value)
+    model = joblib.load(model_path)  # tensorflow/keras model
 
-    df_num = df[other_columns]
-    df = pd.concat([df_num, df_dummy], axis=1)
-    del df_dummy, df_num
+    tokenizer_path = os.path.join(name_path, Constants.TOKENIZER_PATH.value)
+    tokenizer = joblib.load(tokenizer_path)  # tensorflow/keras tokenizer preprocessing
 
-    # all columns - add other of dummy features
-    train_columns = list(normalizer.feature_names_in_)
-    add_col = [col for col in train_columns if col not in df.columns]
+    def model_predict(texts):
+        _seq = tokenizer.texts_to_sequences(texts)
+        _text_data = tf.keras.preprocessing.sequence.pad_sequences(_seq,
+                                                                   maxlen=prep_dict["maxlen"],
+                                                                   padding=prep_dict["padding"])
+        return model.predict(_text_data)
 
-    for col in add_col:
-        df[col] = 0  # se incluye con valor a cero
+    class_name_list = Constants.class_name.value
+    explainer = LimeTextExplainer(class_names=class_name_list)
 
-    df = df[train_columns]  # la muestra a predecir con el mismo orden que la muestra de entrenamiento
+    exp_output = explainer.explain_instance(df['text'].values[0],
+                                            model_predict,
+                                            num_features=len(class_name_list),
+                                            top_labels=len(class_name_list))
 
-    # normalize variables
-    X = normalizer.transform(df)
+    # get probabilities given by neural model
+    probs_df = pd.DataFrame(exp_output.predict_proba, columns=["Probs"], index=class_name_list)
+    probs_df = probs_df.assign(Labels=probs_df.index)
+    probs_df = probs_df.reset_index(drop=True).sort_values(by="Probs", ascending=False)
 
-    # getting prediction
-    # redes convolucionales - se añade una dimensión a los datos
-    X = X.reshape(X.shape[0], X.shape[1], 1)
-    prediction_proba = model.predict(X)
+    # get tokens more important to make decision
+    focus_tokens_df = pd.DataFrame(exp_output.as_list(), columns=["Tokens", "Value"])
 
-    output1 = round(prediction_proba[0][0] * 100, 2)
-    pred = f"{str(output1)} %"
-    return pred
+    print("probabilities")
+    print(probs_df)
+
+    print("")
+    print("tokens used")
+    print(focus_tokens_df)
+
+    return probs_df, focus_tokens_df
